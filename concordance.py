@@ -24,6 +24,7 @@
 """
 import sys
 from nltk.corpus import wordnet as wn
+from nltk.stem.wordnet import WordNetLemmatizer
 def print_summary():
 	print "This module reads the I/P document and prints \n \
 		# Meaningful unique words \n \
@@ -69,6 +70,8 @@ if __name__ == "__main__":
 	concordList = []
 	sort_mode = int(sys.argv[2])
 
+	l = WordNetLemmatizer()
+
 	# Read stop words
 	f_sw = open('stopwords.txt','r')
 	stopwords = f_sw.read()
@@ -79,7 +82,7 @@ if __name__ == "__main__":
 	# Read the document into string
 	f = open(sys.argv[1],'r')
 	text = f.read()
-	print text
+	#print text
 
 	# Split individual words in sentences
 	for word in text.split():
@@ -89,6 +92,7 @@ if __name__ == "__main__":
 
 		# Convert all strings into lowercase
 		word = word.lower()
+		word = l.lemmatize(word)
 		
 		# Add the word to the list
 		if wordList.has_key(word):
