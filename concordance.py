@@ -66,8 +66,11 @@ if __name__ == "__main__":
 		sys.exit()
 
 	# Variables declaration
+	yes_print = 1
+	disable=0
 	wordList = dict()
 	concordList = []
+	greList = []
 	sort_mode = int(sys.argv[2])
 
 	l = WordNetLemmatizer()
@@ -75,6 +78,14 @@ if __name__ == "__main__":
 	# Read stop words
 	f_sw = open('stopwords.txt','r')
 	stopwords = f_sw.read()
+
+	# Read GRE words
+	f_grew = open('grewords_4k.txt','r')
+	#f_grew = open('grewords_8k.txt','r')
+	grewords = f_grew.read()
+
+	for word in grewords.split():
+		greList.append(word)
 
 	# Print summary of the module
 	#print_summary()
@@ -104,30 +115,38 @@ if __name__ == "__main__":
 	for rword in wordList: 
 		wlen = len(wn.synsets(rword))
 		if rword not in stopwords and wlen is not 0:
-			entity=(rword,wordList[rword],wlen)
-			concordList.append(entity)
+			if rword in greList:
+				entity=(rword,wordList[rword],wlen)
+				concordList.append(entity)
+	if yes_print:
+		# Sort Lexicographically
+		if (sort_mode == 1):
+			sorted_list = sorted(concordList,key=lambda concordList:concordList[0])
+			i = 0
+			for item in sorted_list:
+				print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
+				i=i+1
 
-	# Sort Lexicographically
-	if (sort_mode == 1):
-		sorted_list = sorted(concordList,key=lambda concordList:concordList[0])
-		i = 0
-		for item in sorted_list:
-			print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
-			i=i+1
+		# Sort by frequency within the document
+		if (sort_mode == 2):
+			sorted_list = sorted(concordList,key=lambda concordList:concordList[1])
+			i = 0
+			for item in sorted_list:
+				print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
+				i=i+1
+		
+		# Sort by senses in wordnet DB
+		if (sort_mode == 3):
+			sorted_list = sorted(concordList,key=lambda concordList:concordList[2])
+			i = 0
+			for item in sorted_list:
+				print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
+				i=i+1
 
-	# Sort by frequency within the document
-	if (sort_mode == 2):
-		sorted_list = sorted(concordList,key=lambda concordList:concordList[1])
-		i = 0
-		for item in sorted_list:
-			print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
-			i=i+1
-	
-	# Sort by senses in wordnet DB
-	if (sort_mode == 3):
-		sorted_list = sorted(concordList,key=lambda concordList:concordList[2])
-		i = 0
-		for item in sorted_list:
-			print "%20s %2d %2d" % (sorted_list[i][0], sorted_list[i][1], sorted_list[i][2])
-			i=i+1
+	if disable:
+		for word in grewords.split():
+		       wlen = len(wn.synsets(word))
+		       if wlen is not 0:
+		       	rword = l.lemmatize(word)
+		       	print rword
 
