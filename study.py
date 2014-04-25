@@ -1,4 +1,5 @@
 import sys					# for system io
+import sqlite3					# for DB Activities
 import urllib2					# for url parssing et al
 import textwrap					# To limit o/p characters per line
 from nltk.corpus import wordnet as wn		# Wordnet DB
