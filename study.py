@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+
 import sys					# for system io
 import sqlite3					# for DB Activities
 import urllib2					# for url parssing et al
 import textwrap					# To limit o/p characters per line
+import subprocess				# To invoke espeak
+import time
 from nltk.corpus import wordnet as wn		# Wordnet DB
 from nltk.stem.wordnet import WordNetLemmatizer	# To Obtain Lemma
 from BeautifulSoup import BeautifulSoup		
@@ -24,23 +28,36 @@ if __name__ == "__main__":
 	known = 0
 	studied = 0
 	words = 0
+	espeak_cmd = 'espeak  -s 150 -v en-us+f5 '
 
-	fp = open(sys.argv[1],'r')
 	l = WordNetLemmatizer()
 
-	barrons = fp.read()
-	for word in barrons.split():
+	try:
+		fp = open(sys.argv[1],'r')
+		wlist = fp.read()
+	except:
+		wlist = sys.argv[1]
+
+	for word in wlist.split():
 		words = words + 1
 	print "Total words : %d" %(words)
 
-	for word in barrons.split():
+	for word in wlist.split():
 		if len(wn.synsets(word)) is not 0:
 			rlemma = l.lemmatize(word)
+			subprocess.call( espeak_cmd +"'"+word+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 			opt = raw_input( "Display %s : %s?  :   " % (word,l.lemmatize(word)))
 			if opt == 'p':
 				studied = studied+1
 				for ss in wn.synsets(word):
 					print "%20s : %s\n" % (word,ss.definition)
+					time.sleep(0.5)
+			if opt == 's':
+				studied = studied+1
+				for ss in wn.synsets(word):
+					print "%20s : %s\n" % (word,ss.definition)
+					subprocess.call(espeak_cmd +"'"+ss.definition+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+					time.sleep(0.5)
 			if opt == 'e':
 			  	print "Current streak : %d %d" % (studied,known)
 				sys.exit()
