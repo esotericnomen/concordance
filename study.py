@@ -18,14 +18,16 @@ def print_summary():
 	 	$ "+ sys.argv[0] +" input_file \n \
 			input_file : text file containing list of words \
 	" 
-def espeak_play(word):
+def eplay(word):
 	espeak_cmd = 'espeak  -s 150 -v en-us+f5 '
 	subprocess.call( espeak_cmd +"'"+word+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
 def gplay(word):
-	cmd = "wget -q -U Mozilla -O /tmp/output.mp3 \"http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q="+word+"\""
-	os.system(cmd)
-	subprocess.call(["ffplay", "-nodisp", "-autoexit", "/tmp/output.mp3"],stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+	mp3_file_path = "/home/shingu/workspace/concordance/audio_cache/"+word+".mp3"
+	if(os.path.isfile(mp3_file_path) is False):
+		cmd = "wget -q -U Mozilla -O "+mp3_file_path+" \"http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q="+word+"\""
+		os.system(cmd)
+	subprocess.call(["ffplay", "-nodisp", "-autoexit", mp3_file_path],stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
 
 if __name__ == "__main__":
@@ -38,7 +40,6 @@ if __name__ == "__main__":
 	known = 0
 	studied = 0
 	words = 0
-	espeak_cmd = 'espeak  -s 150 -v en-us+f5 '
 
 	l = WordNetLemmatizer()
 
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 	for word in wlist.split():
 		if len(wn.synsets(word)) is not 0:
 			rlemma = l.lemmatize(word)
-			subprocess.call( espeak_cmd +"'"+word+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+			gplay(word)
 			if(get_opt):
 				opt = raw_input( "Display %s : %s?  :   " % (word,l.lemmatize(word)))
 			if opt == 'p':
@@ -70,7 +71,7 @@ if __name__ == "__main__":
 				studied = studied+1
 				for ss in wn.synsets(word):
 					print "%20s : %s\n" % (word,ss.definition)
-					subprocess.call(espeak_cmd +"'"+ss.definition+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+					eplay(ss.definition)
 					time.sleep(0.5)
 			if opt == 'e':
 			  	print "Current streak : %d %d" % (studied,known)
