@@ -6,6 +6,7 @@ import urllib2					# for url parssing et al
 import textwrap					# To limit o/p characters per line
 import subprocess				# To invoke espeak
 import time
+import os
 from nltk.corpus import wordnet as wn		# Wordnet DB
 from nltk.stem.wordnet import WordNetLemmatizer	# To Obtain Lemma
 from BeautifulSoup import BeautifulSoup		
@@ -17,6 +18,15 @@ def print_summary():
 	 	$ "+ sys.argv[0] +" input_file \n \
 			input_file : text file containing list of words \
 	" 
+def espeak_play(word):
+	espeak_cmd = 'espeak  -s 150 -v en-us+f5 '
+	subprocess.call( espeak_cmd +"'"+word+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+
+def gplay(word):
+	cmd = "wget -q -U Mozilla -O /tmp/output.mp3 \"http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q="+word+"\""
+	os.system(cmd)
+	subprocess.call(["ffplay", "-nodisp", "-autoexit", "/tmp/output.mp3"],stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+
 
 if __name__ == "__main__":
 
@@ -35,8 +45,11 @@ if __name__ == "__main__":
 	try:
 		fp = open(sys.argv[1],'r')
 		wlist = fp.read()
+		get_opt=1
 	except:
 		wlist = sys.argv[1]
+		get_opt=0
+		opt='m'
 
 	for word in wlist.split():
 		words = words + 1
@@ -46,7 +59,8 @@ if __name__ == "__main__":
 		if len(wn.synsets(word)) is not 0:
 			rlemma = l.lemmatize(word)
 			subprocess.call( espeak_cmd +"'"+word+"'", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-			opt = raw_input( "Display %s : %s?  :   " % (word,l.lemmatize(word)))
+			if(get_opt):
+				opt = raw_input( "Display %s : %s?  :   " % (word,l.lemmatize(word)))
 			if opt == 'p':
 				studied = studied+1
 				for ss in wn.synsets(word):
